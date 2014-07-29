@@ -1,15 +1,18 @@
 #include <iostream>
+
 #include <string>
+
 #include <exception>
 #include <iterator>
 #include <utility>
 
 #include <boost/variant.hpp>
 
+#include "calculator.h"
 #include "lexer.h"
 #include "parser.h"
 #include "tree.h"
-#include "calculator.h"
+#include "tree_transform.h"
 
 int main()
 {
@@ -31,12 +34,18 @@ int main()
             t_statement<double> t;
             parse_root(s, t);
 
-//            print_statement_tree(t);
-//            cout << endl;
+            print_statement_tree(t);
+            cout << endl;
 
             auto type = identify_statement(t);
             if(type == statement_type::Expression)
             {
+                apply_transform<tree_fold<double>>(boost::get<t_expression<double>>(t));
+
+                cout << "Optimized tree:" << endl;
+                print_expression_tree(boost::get<t_expression<double>>(t));
+                cout << endl;
+
                 cout << eval_expression_tree(calc, boost::get<t_expression<double>>(t)) << endl << endl;
             }
             else if(type == statement_type::VarDefinition)
