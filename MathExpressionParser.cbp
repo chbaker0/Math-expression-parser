@@ -2,7 +2,7 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="RecursiveDescent" />
+		<Option title="MathExpressionParser" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<Build>
@@ -32,13 +32,16 @@
 			</Target>
 		</Build>
 		<Compiler>
+			<Add option="-std=c++11" />
 			<Add option="-Wall" />
+			<Add option="-Wno-unused-parameter" />
 		</Compiler>
 		<Unit filename="calculator.h" />
 		<Unit filename="lexer.h" />
 		<Unit filename="main.cpp" />
 		<Unit filename="parser.h" />
 		<Unit filename="tree.h" />
+		<Unit filename="tree_transform.h" />
 		<Extensions>
 			<code_completion />
 			<envvars />
