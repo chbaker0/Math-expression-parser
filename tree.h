@@ -2,9 +2,11 @@
 #define TREE_H_INCLUDED
 
 #include <iostream>
+
 #include <vector>
-#include <utility>
+
 #include <cmath>
+#include <utility>
 
 #include <boost/variant.hpp>
 

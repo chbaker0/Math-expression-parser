@@ -2,9 +2,10 @@
 #define LEXER_H_INCLUDED
 
 #include <string>
+
+#include <cstdlib>
 #include <utility>
 #include <exception>
-#include <cstdlib>
 
 #include <boost/variant.hpp>
 

@@ -2,13 +2,14 @@
 #define PARSER_H_INCLUDED
 
 #include <sstream>
+
 #include <array>
 #include <string>
-#include <tuple>
 #include <vector>
-#include <iterator>
-#include <exception>
+
 #include <cmath>
+#include <exception>
+#include <iterator>
 
 #include <boost/variant.hpp>
 
