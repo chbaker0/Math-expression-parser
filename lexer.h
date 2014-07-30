@@ -124,7 +124,7 @@ struct token
         destroy();
     }
 
-    token& operator=(token&& mv)
+    token& operator=(token mv)
     {
         this->~token();
         new (this) token(std::move(mv));
