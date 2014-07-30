@@ -68,9 +68,9 @@ void throw_parse_error(parser_state<Iterator>& s, std::string rule, std::string 
     if(s.lookahead.type == token_tag::EOI)
         o << "end-of-input.";
     else if(s.lookahead.type == token_tag::Character)
-        o << '\'' << boost::get<char>(s.lookahead.value) << "'.";
+        o << '\'' << s.lookahead.val.c << "'.";
     else if(s.lookahead.type == token_tag::Number)
-        o << "number " << boost::get<double>(s.lookahead.value) << '.';
+        o << "number " << s.lookahead.val.d << '.';
     else
         o << "invalid token.";
 
@@ -86,14 +86,14 @@ void parse_factor(parser_state<Iterator>&, t_expression<double>&);
 template <typename Iterator>
 void parse_parenthesized_expression(parser_state<Iterator>& s, t_expression<double>& t)
 {
-    if(s.lookahead.type != token_tag::Character || boost::get<char>(s.lookahead.value) != '(')
+    if(s.lookahead.type != token_tag::Character || s.lookahead.val.c != '(')
         throw_parse_error(s, "parenthesized-expression", "'('");
 
     s.scan();
 
     parse_expression(s, t);
 
-    if(s.lookahead.type != token_tag::Character || boost::get<char>(s.lookahead.value) != ')')
+    if(s.lookahead.type != token_tag::Character || s.lookahead.val.c != ')')
         throw_parse_error(s, "parenthesized-expression", "')'");
 }
 
@@ -107,11 +107,11 @@ void parse_atom(parser_state<Iterator>& s, t_expression<double>& t)
 
     if(type == token_tag::Number)
     {
-        t = boost::get<double>(s.lookahead.value);
+        t = s.lookahead.val.d;
     }
     else if(type == token_tag::Identifier)
     {
-        t = t_var_occurrance<double>(move(boost::get<string>(s.lookahead.value)));
+        t = t_var_occurrance<double>(move(s.lookahead.val.str));
     }
     else if(type == token_tag::Character)
     {
@@ -124,7 +124,7 @@ void parse_atom(parser_state<Iterator>& s, t_expression<double>& t)
 
     if(s.lookahead.type == token_tag::Character)
     {
-        op = boost::get<char>(s.lookahead.value);
+        op = s.lookahead.val.c;
 
         if(op == '^')
         {
@@ -142,7 +142,7 @@ void parse_factor(parser_state<Iterator>& s, t_expression<double>& t)
 {
     if(s.lookahead.type == token_tag::Character)
     {
-        char op = boost::get<char>(s.lookahead.value);
+        char op = s.lookahead.val.c;
 
         if(op == '+')
         {
@@ -170,7 +170,7 @@ void parse_term(parser_state<Iterator>& s, t_expression<double>& t)
     parse_factor(s, t);
     while(s.lookahead.type == token_tag::Character)
     {
-        char op = boost::get<char>(s.lookahead.value);
+        char op = s.lookahead.val.c;
         if(op != '*' && op != '/')
             break;
 
@@ -188,14 +188,14 @@ void parse_term(parser_state<Iterator>& s, t_expression<double>& t)
 template <typename Iterator>
 void parse_expression(parser_state<Iterator>& s, t_expression<double>& t)
 {
-    if(s.lookahead.type == token_tag::Character && boost::get<char>(s.lookahead.value) == ')')
+    if(s.lookahead.type == token_tag::Character && s.lookahead.val.c == ')')
         throw_parse_error(s, "expression", "number, identifier, '+', '-' or '('");
 
     parse_term(s, t);
 
     while(s.lookahead.type == token_tag::Character)
     {
-        char op = boost::get<char>(s.lookahead.value);
+        char op = s.lookahead.val.c;
 
         if(op == '+' || op == '-')
         {
@@ -223,11 +223,11 @@ void parse_definition(parser_state<Iterator>& s, t_statement<double>& t)
 {
     using namespace std;
 
-    string name = move(boost::get<string>(s.lookahead.value));
+    string name = move(s.lookahead.val.str);
 
     s.scan();
 
-    if(s.lookahead.type == token_tag::Character && boost::get<char>(s.lookahead.value) == '=')
+    if(s.lookahead.type == token_tag::Character && s.lookahead.val.c == '=')
     {
         s.scan();
 
@@ -240,7 +240,7 @@ void parse_definition(parser_state<Iterator>& s, t_statement<double>& t)
 template <typename Iterator>
 void parse_root(parser_state<Iterator>& s, t_statement<double>& t)
 {
-    if(s.lookahead.type == token_tag::Identifier && boost::get<std::string>(s.lookahead.value) == "define")
+    if(s.lookahead.type == token_tag::Identifier && s.lookahead.val.str == "define")
     {
         s.scan();
         parse_definition(s, t);

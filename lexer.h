@@ -7,8 +7,6 @@
 #include <utility>
 #include <exception>
 
-#include <boost/variant.hpp>
-
 class lex_error : public std::exception
 {
 public:
@@ -30,12 +28,108 @@ enum class token_tag
 struct token
 {
     token_tag type;
-    boost::variant<boost::blank, double, char, std::string> value;
+//    boost::variant<boost::blank, double, char, std::string> value;
 
-    token(): type(token_tag::Invalid), value() {}
-    token(token_tag _type): type(_type), value() {}
-    template <typename ValueType>
-    token(token_tag _type, ValueType&& _value): type(_type), value(std::forward<ValueType>(_value)) {}
+    union _val
+    {
+        double d;
+        char c;
+        std::string str;
+
+        _val() {}
+        ~_val() {}
+    } val;
+
+    void destroy()
+    {
+        switch(type)
+        {
+        case token_tag::Identifier:
+            using std::string;
+            val.str.~string();
+            break;
+
+        default:
+            break;
+        }
+    }
+
+    token(): type(token_tag::Invalid) {}
+    token(token_tag t): type(t) {}
+
+    token(token_tag t, std::string str)
+    {
+        type = t;
+        new (&val.str) std::string(std::move(str));
+    }
+    token(token_tag t, char c)
+    {
+        type = t;
+        val.c = c;
+    }
+    token(token_tag t, double d)
+    {
+        type = t;
+        val.d = d;
+    }
+
+    token(const token& cp)
+    {
+        switch(cp.type)
+        {
+        case token_tag::Identifier:
+            new (&val.str) std::string(cp.val.str);
+            break;
+
+        case token_tag::Character:
+            val.c = cp.val.c;
+            break;
+
+        case token_tag::Number:
+            val.d = cp.val.d;
+            break;
+
+        default:
+            break;
+        }
+
+        type = cp.type;
+    }
+
+    token(token&& mv)
+    {
+        switch(mv.type)
+        {
+        case token_tag::Identifier:
+            new (&val.str) std::string(std::move(mv.val.str));
+            break;
+
+        case token_tag::Character:
+            val.c = mv.val.c;
+            break;
+
+        case token_tag::Number:
+            val.d = mv.val.d;
+            break;
+
+        default:
+            break;
+        }
+
+        type = mv.type;
+    }
+
+    ~token()
+    {
+        destroy();
+    }
+
+    token& operator=(token&& mv)
+    {
+        this->~token();
+        new (this) token(std::move(mv));
+        return *this;
+    }
 };
 
 template <typename Iterator>
@@ -67,8 +161,8 @@ token get_token(Iterator& first, Iterator last)
     case '=':
         goto accept_operator;
 
-    case 'a': case 'b': case 'c': case 'd': case 'e': case 'f': case 'g': case 'h': case 'i': case 'j': case 'l': case 'm': case 'n':
-    case 'o': case 'p': case 'q': case 'r': case 's': case 't': case 'u': case 'v': case 'w': case 'x': case 'y': case 'z':
+    case 'a': case 'b': case 'c': case 'd': case 'e': case 'f': case 'g': case 'h': case 'i': case 'j': case 'k': case 'l': case 'm':
+    case 'n': case 'o': case 'p': case 'q': case 'r': case 's': case 't': case 'u': case 'v': case 'w': case 'x': case 'y': case 'z':
         goto id;
 
     case '.':
