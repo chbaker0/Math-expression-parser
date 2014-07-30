@@ -28,7 +28,6 @@ enum class token_tag
 struct token
 {
     token_tag type;
-//    boost::variant<boost::blank, double, char, std::string> value;
 
     union _val
     {
@@ -126,7 +125,7 @@ struct token
 
     token& operator=(token mv)
     {
-        this->~token();
+        destroy();
         new (this) token(std::move(mv));
         return *this;
     }
